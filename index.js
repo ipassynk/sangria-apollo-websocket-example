@@ -1,56 +1,25 @@
-import { h, app } from "hyperapp";
-import gql from "graphql-tag";
-import { from } from "rxjs";
-import { toPromise } from "rxjs/operators";
-import client from "./createSangriaClient";
+import { h, app } from "./hyperappV2/hyperapp";
+import { apolloSubscption } from "./apolloSubscription";
 
-const query = `
-  subscription NewAuthors {
-    authorCreated {
-      id
-      version
-      firstName
-      lastName
-    }
-  }
-`;
+const ToggleSubscription = state =>
+  Object.assign({}, state, { subscribe: !state.subscribe });
 
-const state = {
-  messages: [],
-  sub: null
-};
-
-const actions = {
-  subscribe: () => (state, actions) => {
-    from(
-      client.subscribe({
-        query: gql`
-          ${query}
-        `,
-        fetchPolicy: "no-cache"
-      })
-    ).
-    subscribe(message => {
-      actions.add(message);
-    });
-  },
-  add: message => state => {
-    return Object.assign({}, state, { messages: [...state.messages, message] });
-  }
-};
-
-const view = (state, actions) => {
-  return (
+app({
+  init: { messages: [], subscribe: false },
+  view: state => (
     <div>
-      <h1>Sangria WebSocket Subscription with Apollo</h1>
-      <button onclick={() => actions.subscribe()}>Subscribe</button>
+      <h1>Sangria WebSocket Subscription with Apollo, RxJs and HyperappV2</h1>
+      <button onclick={ToggleSubscription}>Switch {state.subscribe? 'Off': 'On'} Subscription</button>
+      <h2>Messages:</h2>
       <ul>
-        {state.messages.map((message, index) => (
-          <li id={index}>{JSON.stringify(message)}</li>
+        {state.messages.map(({ firstName, lastName }, index) => (
+          <li id={index}>
+            {firstName} {lastName}
+          </li>
         ))}
       </ul>
     </div>
-  );
-};
-
-app(state, actions, view, document.body);
+  ),
+  subscriptions: state => state.subscribe && apolloSubscption(),
+  container: document.body
+});
