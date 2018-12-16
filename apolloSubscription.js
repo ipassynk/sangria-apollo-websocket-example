@@ -22,7 +22,6 @@ const effect = function(props, dispatch) {
       fetchPolicy: "no-cache"
     })
   ).subscribe(msg => {
-    debugger;
     const {
       data: {
         authorCreated: { firstName, lastName }
@@ -37,7 +36,7 @@ const effect = function(props, dispatch) {
 const AddMessage = (state, message) =>
   Object.assign({}, state, { messages: [...state.messages, message] });
 
-export const apolloSubscption = props => ({
+export const apolloSubscription = props => ({
   effect: effect,
   action: AddMessage
 });

@@ -15,18 +15,19 @@ class WebSocketBasicLink extends ApolloLink {
         const query = print(operation.query);
         const subject = webSocket(uri);
         subject.next({ query });
+
         const sub = subject.subscribe(
           data => observer.next(data),
           error => observer.error(error),
           () => observer.complete()
         );
-      });
 
-      return () => {
-        if (!sub.closed) {
-          sub.unsubscribe();
-        }
-      };
+        return () => {
+          if (!sub.closed) {
+            sub.unsubscribe();
+          }
+        };
+      });
     };
   }
 
